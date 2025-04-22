@@ -7,6 +7,8 @@ const cors = require("cors");
 const authRoute = require("./routes/auth.route");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route");
+const cartRoute = require("./routes/cart.route");
+const authMiddleware = require("./middleware/auth.middleware");
 require("dotenv").config();
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -25,6 +27,7 @@ app.use(bodyParser.json());
 app.use("/auth", authRoute);
 app.use("/users", userRoute);
 app.use("/products", productRoute);
+app.use("/carts", authMiddleware.isAuth, cartRoute);
 
 // Create an HTTP server
 const server = http.createServer(app);

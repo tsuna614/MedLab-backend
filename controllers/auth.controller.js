@@ -61,6 +61,7 @@ const authController = {
 
     const dataForAccessToken = {
       email: user[0].email,
+      id: user[0]._id,
     };
     const accessToken = await authMethod.generateToken(
       dataForAccessToken,

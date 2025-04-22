@@ -11,17 +11,37 @@ const authMiddleware = {
 
     const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 
-    const verified = await authMethod.verifyToken(
+    const decodedPayload = await authMethod.verifyToken(
       accessTokenFromHeader,
       accessTokenSecret
     );
-    if (!verified) {
+    if (!decodedPayload) {
       return res
         .status(401)
         .send("You are not authorized to access this resource.");
     }
 
-    return next();
+    console.log(
+      `Auth Middleware: Decoded payload - ${JSON.stringify(decodedPayload)}`
+    );
+
+    if (decodedPayload.payload.id && decodedPayload.payload.email) {
+      req.user = {
+        id: decodedPayload.payload.id,
+        email: decodedPayload.payload.email,
+      };
+      console.log(
+        `Auth Middleware: User authenticated - ${decodedPayload.payload.id}`
+      );
+      return next();
+    } else {
+      console.log(
+        "Auth Middleware: Token verified but missing email in payload."
+      );
+      return res
+        .status(401)
+        .send("Authentication failed: Invalid token payload.");
+    }
   },
 };
 
