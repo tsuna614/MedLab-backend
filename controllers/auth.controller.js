@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 const authMethod = require("../methods/auth.methods");
 const jwt = require("jsonwebtoken");
+const { json } = require("body-parser");
 // const randToken = require("rand-token"); // I have no idea what this import is
 
 const authController = {
@@ -12,11 +13,11 @@ const authController = {
     const user = await userController.getUserEmail(email);
     //   console.log(user);
     if (user.length > 0)
-      res
-        .status(409)
-        .send(
-          "The email that you entered is already in use! Please try again."
-        );
+      res.status(409).send(
+        JSON.stringify({
+          msg: "Email already exists. Please try another email.",
+        })
+      );
     else {
       const hashPassword = bcrypt.hashSync(req.body.password, SALT_ROUNDS);
       // const newUser = {
@@ -36,14 +37,22 @@ const authController = {
 
     const user = await userController.getUserEmail(email);
     if (user.length == 0) {
-      return res.status(401).send("Email does not exist.");
+      return res.status(401).send(
+        JSON.stringify({
+          msg: "Email does not exist.",
+        })
+      );
     }
 
     console.log(`Email: ${email}, Password: ${password}, ${user[0].password}`);
 
     const isPasswordValid = bcrypt.compareSync(password, user[0].password);
     if (!isPasswordValid) {
-      return res.status(401).send("Password is not correct.");
+      return res.status(401).send(
+        JSON.stringify({
+          msg: "Password is not correct.",
+        })
+      );
     }
 
     const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -59,7 +68,11 @@ const authController = {
       accessTokenLife
     );
     if (!accessToken) {
-      return res.status(401).send("Login failed, please try again.");
+      return res.status(401).send(
+        JSON.stringify({
+          msg: "Login failed, please try again.",
+        })
+      );
     }
 
     // let refreshToken = randToken.generate(jwt.refreshTokenSize); // tạo 1 refresh token ngẫu nhiên
@@ -80,24 +93,31 @@ const authController = {
       refreshToken = user[0].refreshToken;
     }
 
+    const userData = user[0];
+
     return res.json({
       msg: "Login successfully!",
       accessToken,
       refreshToken,
-      user,
+      userData,
     });
   },
+
   refreshToken: async (req, res) => {
     // Lấy access token từ header
     const accessTokenFromHeader = req.headers.x_authorization;
     if (!accessTokenFromHeader) {
-      return res.status(400).send("No access token found.");
+      return res
+        .status(400)
+        .send(JSON.stringify({ msg: "No access token found." }));
     }
 
     // Lấy refresh token từ body
     const refreshTokenFromBody = req.body.refreshToken;
     if (!refreshTokenFromBody) {
-      return res.status(400).send("No refresh token found.");
+      return res
+        .status(400)
+        .send(JSON.stringify({ msg: "No refresh token found." }));
     }
 
     const accessTokenSecret =
@@ -111,7 +131,9 @@ const authController = {
       accessTokenSecret
     );
     if (!decoded) {
-      return res.status(400).send("Invalid access token.");
+      return res
+        .status(400)
+        .send(JSON.stringify({ msg: "Invalid access token." }));
     }
 
     // console.log(decoded.payload.email);
@@ -121,14 +143,18 @@ const authController = {
     const user = await userController.getUserEmail(email);
 
     if (user.length === 0) {
-      return res.status(401).send("Email does not exist.");
+      return res
+        .status(401)
+        .send(JSON.stringify({ msg: "Email does not exist." }));
     }
 
     // console.log(email);
     console.log(user[0].refreshToken);
 
     if (refreshTokenFromBody !== user[0].refreshToken) {
-      return res.status(400).send("Invalid refresh token.");
+      return res
+        .status(400)
+        .send(JSON.stringify({ msg: "Invalid refresh token." }));
     }
 
     // Tạo access token mới
@@ -142,9 +168,11 @@ const authController = {
       accessTokenLife
     );
     if (!accessToken) {
-      return res
-        .status(400)
-        .send("Cannot create new access token. Please login again.");
+      return res.status(400).send(
+        JSON.stringify({
+          msg: "Cannot create new access token. Please login again.",
+        })
+      );
     }
     return res.json({
       accessToken,
