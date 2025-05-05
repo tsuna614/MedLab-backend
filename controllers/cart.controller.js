@@ -6,7 +6,10 @@ const cartController = {
     try {
       const userId = req.user.id;
 
-      const cart = await Cart.findOne({ userId: userId });
+      const cart = await Cart.findOne({ userId: userId }).populate(
+        "items.productId",
+        "name price imageUrl stock prescriptionRequired"
+      );
 
       if (!cart) {
         return res
@@ -56,6 +59,11 @@ const cartController = {
           cart.items.push({ productId, quantity });
         }
       }
+
+      cart.populate(
+        "items.productId",
+        "name price imageUrl stock prescriptionRequired"
+      );
 
       await cart.save();
 

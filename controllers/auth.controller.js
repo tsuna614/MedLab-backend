@@ -50,7 +50,7 @@ const authController = {
     if (!isPasswordValid) {
       return res.status(401).send(
         JSON.stringify({
-          msg: "Password is not correct.",
+          msg: "Username or password is incorrect. Please try again.",
         })
       );
     }

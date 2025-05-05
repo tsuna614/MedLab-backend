@@ -34,18 +34,18 @@ const cartSchema = mongoose.Schema(
   }
 );
 
-// // Middleware to update the `updatedAt` field on save
-// cartSchema.pre('save', function(next) {
-//     this.updatedAt = Date.now();
-//     next();
-// });
+// Middleware to update the `updatedAt` field on save
+cartSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
-// // Middleware to update the `updatedAt` field on findOneAndUpdate
-// cartSchema.pre('findOneAndUpdate', function(next) {
-//     this.set({ updatedAt: Date.now() });
-//     next();
-// });
+// Middleware to update the `updatedAt` field on findOneAndUpdate
+cartSchema.pre("findOneAndUpdate", function (next) {
+  this.set({ updatedAt: Date.now() });
+  next();
+});
 
-const Product = mongoose.model("carts", cartSchema);
+const Cart = mongoose.model("carts", cartSchema);
 
-module.exports = Product;
+module.exports = Cart;

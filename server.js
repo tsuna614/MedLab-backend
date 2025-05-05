@@ -8,6 +8,7 @@ const authRoute = require("./routes/auth.route");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route");
 const cartRoute = require("./routes/cart.route");
+const orderRoute = require("./routes/order.route");
 const authMiddleware = require("./middleware/auth.middleware");
 require("dotenv").config();
 
@@ -28,6 +29,7 @@ app.use("/auth", authRoute);
 app.use("/users", userRoute);
 app.use("/products", productRoute);
 app.use("/carts", authMiddleware.isAuth, cartRoute);
+app.use("/orders", authMiddleware.isAuth, orderRoute);
 
 // Create an HTTP server
 const server = http.createServer(app);
