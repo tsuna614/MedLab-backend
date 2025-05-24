@@ -11,7 +11,7 @@ const userController = {
   },
   getUserById: async (req, res) => {
     try {
-      const { id } = req.params;
+      const id = req.user.id;
       const user = await User.findById(id);
       res.json(user);
     } catch (error) {
@@ -42,18 +42,18 @@ const userController = {
   },
   updateUser: async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = req.user.id;
       const user = await User.findOneAndUpdate({ _id: id }, req.body, {
         new: true,
       });
-      res.status(200).json("Updated successfully");
+      res.status(200).json({ msg: "Updated successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
   deleteUser: async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = req.user.id;
       await User.findByIdAndDelete(id);
       res.status(200).json("Deleted successfully");
     } catch (error) {

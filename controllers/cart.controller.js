@@ -6,6 +6,7 @@ const cartController = {
     try {
       const userId = req.user.id;
 
+      // const cart = await Cart.findOne({ userId: userId });
       const cart = await Cart.findOne({ userId: userId }).populate(
         "items.productId",
         "name price imageUrl stock prescriptionRequired"

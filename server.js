@@ -10,6 +10,7 @@ const productRoute = require("./routes/product.route");
 const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
 const authMiddleware = require("./middleware/auth.middleware");
+const messageRoute = require("./routes/message.route");
 require("dotenv").config();
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -26,10 +27,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use("/auth", authRoute);
-app.use("/users", userRoute);
+app.use("/users", authMiddleware.isAuth, userRoute);
 app.use("/products", productRoute);
 app.use("/carts", authMiddleware.isAuth, cartRoute);
 app.use("/orders", authMiddleware.isAuth, orderRoute);
+app.use("/messages", authMiddleware.isAuth, messageRoute);
 
 // Create an HTTP server
 const server = http.createServer(app);

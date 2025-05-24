@@ -1,5 +1,35 @@
 const mongoose = require("mongoose");
 
+const addressSchema = mongoose.Schema(
+  {
+    address: {
+      type: String,
+      required: true,
+    },
+    street: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: false,
+    },
+    postalCode: {
+      type: String,
+      required: false,
+    },
+    country: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = mongoose.Schema(
   {
     email: {
@@ -20,6 +50,10 @@ const userSchema = mongoose.Schema(
     },
     number: {
       type: String,
+      required: false,
+    },
+    address: {
+      type: addressSchema,
       required: false,
     },
     userType: {

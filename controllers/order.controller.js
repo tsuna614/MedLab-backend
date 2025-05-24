@@ -6,7 +6,21 @@ const mongoose = require("mongoose");
 const orderController = {
   getAllOrders: async (req, res) => {
     try {
-      const orders = await Order.find();
+      const userId = req.user.id;
+
+      // console.log("====================================");
+      console.log(`User ID: ${userId}`);
+      // console.log("====================================");
+
+      const orders = await Order.find({ userId: userId });
+      // const orders = await Order.find({ userId: userId }).popuplate(
+      //   "items.productId",
+      //   "name price imageUrl stock prescriptionRequired"
+      // );
+
+      if (!orders) {
+        return res.status(404).json({ message: "No orders found." });
+      }
 
       res.status(200).json(orders);
     } catch (error) {
@@ -14,13 +28,13 @@ const orderController = {
     }
   },
   createOrder: async (req, res) => {
-    // Use a database session for transaction capabilities.
+    console.log("====================================");
+    console.log(req.body);
+    console.log("====================================");
 
-    // It ensures that all operations (checking stock, decrementing stock, creating the order, clearing the cart)
-    // succeed together, or none of them do. If any step fails (e.g., stock decrement fails), the entire operation is rolled
-    // back, preventing partial inconsistent data.
+    // use session because if any step fail, rollback all changes
     const session = await mongoose.startSession();
-    session.startTransaction(); // Start the transaction
+    session.startTransaction();
 
     try {
       // 1. Extract Data & Validate Input
