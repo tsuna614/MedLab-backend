@@ -6,6 +6,11 @@ const messageItemSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    senderType: {
+      type: String,
+      enum: ["user", "ai"],
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -29,18 +34,6 @@ const messageSchema = mongoose.Schema(
     versionKey: false,
   }
 );
-
-// Middleware to update the `updatedAt` field on save
-messageSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
-
-// Middleware to update the `updatedAt` field on findOneAndUpdate
-messageSchema.pre("findOneAndUpdate", function (next) {
-  this.set({ updatedAt: Date.now() });
-  next();
-});
 
 const Message = mongoose.model("messages", messageSchema);
 
