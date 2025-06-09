@@ -49,6 +49,8 @@ const productController = {
     try {
       const input = req.body;
 
+      console.log("Input received for product creation:", input);
+
       // Check if it's a single object or an array
       const data = Array.isArray(input)
         ? input.map((p) => ({ ...p }))

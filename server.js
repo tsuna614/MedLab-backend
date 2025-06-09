@@ -11,6 +11,7 @@ const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
 const authMiddleware = require("./middleware/auth.middleware");
 const messageRoute = require("./routes/message.route");
+const loggerMiddleware = require("./middleware/logger.middleware");
 require("dotenv").config();
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -25,6 +26,8 @@ db.on("open", () => {
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(loggerMiddleware);
 
 app.use("/auth", authRoute);
 app.use("/users", authMiddleware.isAuth, userRoute);
