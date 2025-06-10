@@ -3,13 +3,41 @@ const User = require("../models/user.model");
 const userController = {
   getAllUsers: async (req, res) => {
     try {
-      const users = await User.find();
-      res.json(users);
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+      const searchValue = req.query.searchValue || "";
+      const filter = searchValue;
+
+      const users = await User.find({
+        $or: [
+          { firstName: { $regex: filter, $options: "i" } },
+          { lastName: { $regex: filter, $options: "i" } },
+          { email: { $regex: filter, $options: "i" } },
+        ],
+      })
+        .skip(skip)
+        .limit(limit);
+
+      const total = await User.countDocuments({
+        $or: [
+          { firstName: { $regex: filter, $options: "i" } },
+          { lastName: { $regex: filter, $options: "i" } },
+          { email: { $regex: filter, $options: "i" } },
+        ],
+      });
+
+      res.status(200).json({
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        users,
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   },
-  getUserById: async (req, res) => {
+  getUser: async (req, res) => {
     try {
       const id = req.user.id;
       const user = await User.findById(id);
@@ -42,7 +70,7 @@ const userController = {
   },
   updateUser: async (req, res) => {
     try {
-      const id = req.user.id;
+      const id = req.params.id;
       const user = await User.findOneAndUpdate({ _id: id }, req.body, {
         new: true,
       });
@@ -53,7 +81,7 @@ const userController = {
   },
   deleteUser: async (req, res) => {
     try {
-      const id = req.user.id;
+      const id = req.params.id;
       await User.findByIdAndDelete(id);
       res.status(200).json("Deleted successfully");
     } catch (error) {

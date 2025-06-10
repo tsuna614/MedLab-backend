@@ -1,16 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/order.controller");
+const authMiddleware = require("../middleware/auth.middleware");
 
-router.get("/", orderController.getAllOrders);
+router.get(
+  "/getAllUserOrder",
+  authMiddleware.isAuth,
+  orderController.getAllUserOrder
+);
 
-// router.get("/:id", orderController.getOrderById);
+router.get("/", orderController.getOrders);
 
-router.post("/", orderController.createOrder);
+router.post("/", authMiddleware.isAuth, orderController.createOrder);
 
-// router.put("/items/:productId", orderController.updateItemQuantity);
+router.put("/updateOrderStatus/:id", orderController.updateOrderStatus);
 
-// router.delete("/items/:productId", orderController.removeItem);
+router.delete("/:id", orderController.deleteOrder);
 
 // router.delete("/", orderController.clearOrder);
 

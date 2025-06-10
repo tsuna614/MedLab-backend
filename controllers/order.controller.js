@@ -4,19 +4,44 @@ const Cart = require("../models/cart.model");
 const mongoose = require("mongoose");
 
 const orderController = {
-  getAllOrders: async (req, res) => {
+  getOrders: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
+      const status = req.query.status;
+
+      const filter = {};
+      if (status) {
+        filter.status = status;
+      }
+
+      const orders = await Order.find(filter)
+        .skip(skip)
+        .limit(limit)
+        .populate("userId", "name email");
+
+      const total = await Order.countDocuments(filter);
+
+      res.status(200).json({
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        orders,
+      });
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Error fetching orders", error });
+    }
+  },
+  getAllUserOrder: async (req, res) => {
     try {
       const userId = req.user.id;
 
-      // console.log("====================================");
       console.log(`User ID: ${userId}`);
-      // console.log("====================================");
 
       const orders = await Order.find({ userId: userId });
-      // const orders = await Order.find({ userId: userId }).popuplate(
-      //   "items.productId",
-      //   "name price imageUrl stock prescriptionRequired"
-      // );
 
       if (!orders) {
         return res.status(404).json({ message: "No orders found." });
@@ -272,11 +297,22 @@ const orderController = {
       res.status(500).json({ message: "Error fetching order", error });
     }
   },
-
   updateOrderStatus: async (req, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
+      if (
+        [
+          "Pending",
+          "Processing",
+          "Shipped",
+          "Delivered",
+          "Cancelled",
+          "Refunded",
+        ].indexOf(status) === -1
+      ) {
+        return res.status(400).json({ message: "Invalid status provided" });
+      }
       const order = await Order.findByIdAndUpdate(
         id,
         { status },
@@ -290,10 +326,12 @@ const orderController = {
       res.status(500).json({ message: "Error updating order", error });
     }
   },
-
   deleteOrder: async (req, res) => {
     try {
-      const { id } = req.params;
+      const id = req.params.id;
+      console.log("====================================");
+      console.log(`Deleting order with ID: ${id}`);
+      console.log("====================================");
       const order = await Order.findByIdAndDelete(id);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });

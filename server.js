@@ -30,10 +30,10 @@ app.use(bodyParser.json());
 app.use(loggerMiddleware);
 
 app.use("/auth", authRoute);
-app.use("/users", authMiddleware.isAuth, userRoute);
+app.use("/users", userRoute);
 app.use("/products", productRoute);
 app.use("/carts", authMiddleware.isAuth, cartRoute);
-app.use("/orders", authMiddleware.isAuth, orderRoute);
+app.use("/orders", orderRoute);
 app.use("/messages", authMiddleware.isAuth, messageRoute);
 
 // Create an HTTP server
