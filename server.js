@@ -12,6 +12,7 @@ const cartRoute = require("./routes/cart.route");
 const orderRoute = require("./routes/order.route");
 const authMiddleware = require("./middleware/auth.middleware");
 const messageRoute = require("./routes/message.route");
+const voucherRoute = require("./routes/voucher.route");
 const loggerMiddleware = require("./middleware/logger.middleware");
 require("dotenv").config();
 
@@ -36,7 +37,8 @@ app.use("/products", productRoute);
 app.use("/doctors", doctorRoute);
 app.use("/carts", authMiddleware.isAuth, cartRoute);
 app.use("/orders", orderRoute);
-app.use("/messages", authMiddleware.isAuth, messageRoute);
+app.use("/messages", messageRoute);
+app.use("/vouchers", voucherRoute);
 
 // Create an HTTP server
 const server = http.createServer(app);

@@ -1,10 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const messageController = require("../controllers/message.controller");
+const authMiddleware = require("../middleware/auth.middleware");
 
 // get all messages
-router.get("/", messageController.getMessages);
+router.get(
+  "/fetchAIMessages",
+  authMiddleware.isAuth,
+  messageController.fetchAIMessages
+);
+router.get(
+  "/fetchMessages",
+  authMiddleware.isAuth,
+  messageController.fetchMessages
+);
+router.get("/fetchMessages/:id", messageController.fetchMessages);
 
-router.post("/", messageController.postMessage);
+router.post(
+  "/generateAIMessage",
+  authMiddleware.isAuth,
+  messageController.generateAIMessage
+);
+
+router.post(
+  "/sendMessage",
+  authMiddleware.isAuth,
+  messageController.postMessage
+);
+router.post("/sendMessage/:id", messageController.adminPostMessage);
 
 module.exports = router;

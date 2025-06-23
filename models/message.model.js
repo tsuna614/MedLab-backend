@@ -8,7 +8,7 @@ const messageItemSchema = mongoose.Schema(
     },
     senderType: {
       type: String,
-      enum: ["user", "ai"],
+      enum: ["user", "ai", "admin"],
       required: true,
     },
   },
@@ -28,6 +28,7 @@ const messageSchema = mongoose.Schema(
       index: true,
     },
     messages: [messageItemSchema],
+    adminMessage: [messageItemSchema], // this is the messages between admin and user
   },
   {
     timestamps: false,

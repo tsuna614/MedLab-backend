@@ -60,7 +60,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: false,
     },
-    receiptsId: {
+    usedVouchersCode: {
       type: [String],
       required: false,
     },

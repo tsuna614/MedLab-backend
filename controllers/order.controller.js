@@ -18,6 +18,7 @@ const orderController = {
       }
 
       const orders = await Order.find(filter)
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate("userId", "name email");
@@ -63,8 +64,12 @@ const orderController = {
 
     try {
       // 1. Extract Data & Validate Input
-      const { items, shippingAddress /* , paymentMethodId (etc.) */ } =
-        req.body;
+      const {
+        items,
+        shippingAddress,
+        paymentMethodDetails,
+        discountPercentage,
+      } = req.body;
       const userId = req.user.id; // Get user ID from authenticated request
 
       if (!userId) {
@@ -77,13 +82,25 @@ const orderController = {
         session.endSession();
         return res.status(400).json({ message: "Order must contain items." });
       }
-      if (!shippingAddress /* || !paymentMethodId */) {
+      if (!shippingAddress || !paymentMethodDetails) {
         // Add validation for other required fields
         await session.abortTransaction();
         session.endSession();
         return res.status(400).json({
           message: "Missing required order information (e.g., address).",
         });
+      }
+      if (
+        discountPercentage !== undefined &&
+        (typeof discountPercentage !== "number" ||
+          discountPercentage < 0 ||
+          discountPercentage > 100)
+      ) {
+        await session.abortTransaction();
+        session.endSession();
+        return res
+          .status(400)
+          .json({ message: "Invalid discount percentage provided." });
       }
 
       // Validate item structure (basic example)
@@ -212,7 +229,9 @@ const orderController = {
       // Add calculated total, tax, shipping (calculate these properly)
       const shippingCost = 5.0; // Example - Calculate properly
       const taxAmount = calculatedTotalAmount * 0.08; // Example 8% - Calculate properly
-      const finalTotal = calculatedTotalAmount + shippingCost + taxAmount;
+      const finalTotal =
+        (calculatedTotalAmount + shippingCost + taxAmount) *
+        (1 - (discountPercentage || 0) / 100); // Apply discount if provided
 
       const newOrder = new Order({
         userId: userId,
@@ -223,7 +242,8 @@ const orderController = {
         shippingCost: shippingCost,
         taxAmount: taxAmount,
         status: "Pending", // Initial status
-        paymentMethodDetails: "placeholder", // Add payment details safely
+        paymentMethodDetails: paymentMethodDetails, // Add payment details safely
+        discountPercentage: discountPercentage || 0, // Default to 0 if not provided
       });
 
       const savedOrder = await newOrder.save({ session: session });

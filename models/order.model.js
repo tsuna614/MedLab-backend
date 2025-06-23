@@ -87,6 +87,11 @@ const orderSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    discountPercentage: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     status: {
       type: String,
       enum: [
