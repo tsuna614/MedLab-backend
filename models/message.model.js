@@ -38,4 +38,4 @@ const messageSchema = mongoose.Schema(
 
 const Message = mongoose.model("messages", messageSchema);
 
-module.exports = Message;
+module.exports = { Message, messageItemSchema };

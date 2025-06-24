@@ -14,6 +14,7 @@ const authMiddleware = require("./middleware/auth.middleware");
 const messageRoute = require("./routes/message.route");
 const voucherRoute = require("./routes/voucher.route");
 const loggerMiddleware = require("./middleware/logger.middleware");
+const setupWebSocket = require("./utils/websocket");
 require("dotenv").config();
 
 mongoose.connect(process.env.MONGODB_URI);
@@ -42,6 +43,9 @@ app.use("/vouchers", voucherRoute);
 
 // Create an HTTP server
 const server = http.createServer(app);
+
+// Setup WebSocket
+setupWebSocket(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
