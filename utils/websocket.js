@@ -29,23 +29,21 @@ function setupWebSocket(server) {
       };
 
       try {
-        // await newMessage.save(); // Uncomment when you want to save to DB
+        const response = await messageController.postMessage(newMessage);
+        if (response.status === 200) {
+          console.log("Message sent successfully:", response);
 
-        wss.clients.forEach(async (client) => {
-          if (
-            client.readyState === WebSocket.OPEN &&
-            client.userId === userId
-          ) {
-            const response = await messageController.postMessage(newMessage);
-            if (response.status === 200) {
-              console.log("Message sent successfully:", response);
+          wss.clients.forEach((client) => {
+            if (
+              client.readyState === WebSocket.OPEN &&
+              client.userId === userId
+            ) {
               client.send(JSON.stringify(newMessage));
-            } else {
-              console.error("Error sending message:", response);
-              client.send(JSON.stringify({ error: response.message }));
             }
-          }
-        });
+          });
+        } else {
+          console.error("Error sending message:", response);
+        }
       } catch (error) {
         console.error("Error saving message:", error);
       }
