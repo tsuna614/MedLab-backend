@@ -84,4 +84,4 @@ The server will be accessible at `http://localhost:3000`.
 
 * Make sure Docker is installed and running.
 * Ensure that the `.env` file exists in the root directory.
-* If you face any issues, feel free to contact me via nqkhanh@gmail.com
+* If you face any issues, feel free to contact me via nqkhanh614@gmail.com
