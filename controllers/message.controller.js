@@ -15,7 +15,7 @@ const messageController = {
       //   "messages.createdAt": -1, // this sorts the messages by timestamps
       // });
 
-      if (!messageDoc || messageDoc.messages.length === 0) {
+      if (!messageDoc) {
         return res
           .status(404)
           .json({ message: "No messages found for this user." });
