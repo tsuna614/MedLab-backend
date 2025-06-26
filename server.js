@@ -33,7 +33,7 @@ app.use(
   express.json({
     verify: (req, res, buf) => {
       // Special middleware for Stripe webhooks
-      if (req.originalUrl.startsWith("/api/webhooks/stripe")) {
+      if (req.originalUrl.startsWith("/api/payments/stripe")) {
         // Only for Stripe webhook route
         req.rawBody = buf.toString();
       }
