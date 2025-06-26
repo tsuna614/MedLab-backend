@@ -13,6 +13,7 @@ const orderRoute = require("./routes/order.route");
 const authMiddleware = require("./middleware/auth.middleware");
 const messageRoute = require("./routes/message.route");
 const voucherRoute = require("./routes/voucher.route");
+const paymentRoutes = require("./controllers/stripe/payment.routes");
 const loggerMiddleware = require("./middleware/logger.middleware");
 const setupWebSocket = require("./utils/websocket");
 require("dotenv").config();
@@ -27,11 +28,25 @@ db.on("open", () => {
 });
 
 app.use(cors());
+
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      // Special middleware for Stripe webhooks
+      if (req.originalUrl.startsWith("/api/webhooks/stripe")) {
+        // Only for Stripe webhook route
+        req.rawBody = buf.toString();
+      }
+    },
+  })
+);
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(loggerMiddleware);
 
+app.use("/api/payments", paymentRoutes);
 app.use("/auth", authRoute);
 app.use("/users", userRoute);
 app.use("/products", productRoute);

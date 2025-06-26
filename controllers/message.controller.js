@@ -9,11 +9,11 @@ const messageController = {
       const userId = req.user.id;
 
       // Find the user's messages
-      const messageDoc = await Message.findOne({ userId: userId })
-        .select("-adminMessage") // Exclude admin messages
-        .sort({
-          "messages.createdAt": -1, // this sorts the messages by timestamps
-        });
+      const messageDoc = await Message.findOne({ userId: userId });
+      // .select("-adminMessage") // Exclude admin messages
+      // .sort({
+      //   "messages.createdAt": -1, // this sorts the messages by timestamps
+      // });
 
       if (!messageDoc || messageDoc.messages.length === 0) {
         return res
