@@ -39,7 +39,12 @@ const productController = {
   getProductByLabel: async (req, res) => {
     try {
       const { label } = req.query;
-      const product = await Product.find({ label: new RegExp(label, "i") });
+      const product = await Product.findOne({ label: new RegExp(label, "i") });
+
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
       res.status(200).json(product);
     } catch (error) {
       res.status(500).json({ message: error.message });
