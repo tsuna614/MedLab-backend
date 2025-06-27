@@ -36,6 +36,15 @@ const productController = {
       res.status(500).json({ message: error.message });
     }
   },
+  getProductByLabel: async (req, res) => {
+    try {
+      const { label } = req.query;
+      const product = await Product.find({ label: new RegExp(label, "i") });
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
   getProductByEmail: async (req, res) => {
     try {
       const { email } = req.params;
