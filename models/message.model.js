@@ -11,6 +11,14 @@ const messageItemSchema = mongoose.Schema(
       enum: ["user", "ai", "admin"],
       required: true,
     },
+    isRead: {
+      type: Boolean, // only for "user" senderType, indicates if the admin has read the message
+      default: false,
+    },
+    productSuggestion: {
+      type: [String],
+      required: false, // this is for AI suggestions
+    },
   },
   {
     timestamps: true,

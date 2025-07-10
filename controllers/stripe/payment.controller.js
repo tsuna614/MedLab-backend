@@ -29,7 +29,7 @@ const paymentController = {
       }
 
       const paymentIntentParams = {
-        amount: Math.round(amount * 100),
+        amount: Math.round(amount),
         currency: currency,
         automatic_payment_methods: {
           enabled: true,

@@ -1,16 +1,26 @@
 const Product = require("../models/product.model");
 
 const productController = {
-  getAllProducts: async (req, res) => {
+  queryProduct: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
       const category = req.query.category;
+      const language = req.query.language;
 
       const filter = {};
       if (category) {
         filter.category = category;
+      }
+      // Ensure language is a valid string
+      filter.language = language;
+      if (typeof language !== "string" || !language.trim()) {
+        console.log(`Filtering products by language: defaulting to 'en'`);
+        filter.language = "en";
+      } else {
+        console.log(`Filtering products by language: ${language}`);
+        filter.language = language;
       }
 
       const products = await Product.find(filter).skip(skip).limit(limit);
@@ -38,8 +48,32 @@ const productController = {
   },
   getProductByLabel: async (req, res) => {
     try {
-      const { label } = req.query;
-      const product = await Product.findOne({ label: new RegExp(label, "i") });
+      const label = req.query.label;
+      const language = req.query.language || "en";
+
+      const product = await Product.findOne({
+        label: new RegExp(label, "i"),
+        language: language,
+      });
+
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  getProductByName: async (req, res) => {
+    try {
+      const name = req.query.name;
+      const language = req.query.language || "en";
+
+      const product = await Product.findOne({
+        name: new RegExp(name, "i"),
+        language: language,
+      });
 
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
@@ -95,6 +129,19 @@ const productController = {
       res.status(200).json("Deleted successfully");
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+  getProductForAIBot: async () => {
+    try {
+      const products = await Product.find({
+        language: "en",
+      }).select("name");
+      const productNames = products.map((p) => p.name);
+      console.log("Product names for AI Bot:", productNames);
+      return productNames;
+    } catch (error) {
+      console.error("Error fetching products for AI Bot:", error);
+      throw new Error("Failed to fetch products for AI Bot");
     }
   },
 };

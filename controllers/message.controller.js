@@ -2,6 +2,15 @@ const { Message } = require("../models/message.model");
 const { generateMessage } = require("../api/openai");
 const mongoose = require("mongoose");
 const User = require("../models/user.model");
+const productController = require("./product.controller");
+
+function normalizeText(text) {
+  return text
+    .replace(/[\u202F\u00A0\u2000-\u200B]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
 
 const messageController = {
   fetchAIMessages: async (req, res) => {
@@ -79,8 +88,10 @@ const messageController = {
 
       let aiResponse;
 
+      const productNames = await productController.getProductForAIBot();
+
       try {
-        const openAIResponse = await generateMessage(userMessage);
+        const openAIResponse = await generateMessage(userMessage, productNames);
         if (
           Array.isArray(openAIResponse) &&
           openAIResponse.length > 0 &&
@@ -95,13 +106,23 @@ const messageController = {
         }
       } catch (openaiError) {}
 
+      const suggestedProducts = productNames.filter((name) =>
+        normalizeText(aiResponse).includes(normalizeText(name))
+      );
+
+      console.log("Suggested products:", suggestedProducts);
+
       // Check if the user already has a message document
       let messageDoc = await Message.findOne({ userId: userId }).session(
         session
       );
 
       const userMessageObj = { message: userMessage, senderType: "user" };
-      const aiMessageObj = { message: aiResponse, senderType: "ai" };
+      const aiMessageObj = {
+        message: aiResponse,
+        senderType: "ai",
+        productSuggestion: suggestedProducts,
+      };
 
       if (!messageDoc) {
         // If not, create a new message document
@@ -120,7 +141,10 @@ const messageController = {
       await session.commitTransaction();
       session.endSession();
 
-      res.status(200).json({ message: aiResponse });
+      res.status(200).json({
+        message: aiResponse,
+        productSuggestion: suggestedProducts || null,
+      });
     } catch (err) {
       console.error("Error in generateAIMessage:", err);
       await session.abortTransaction();
@@ -128,7 +152,6 @@ const messageController = {
       res.status(500).json({ message: err.message });
     }
   },
-
   postMessage: async (newMessage) => {
     const { message, senderType, userId } = newMessage;
 
@@ -159,7 +182,11 @@ const messageController = {
         session
       );
 
-      const userMessageObj = { message, senderType };
+      const userMessageObj = {
+        message,
+        senderType,
+        isRead: senderType === "admin", // mark as read if admin sends, else unread
+      };
 
       if (!messageDoc) {
         let user = await User.findById(userId).session(session);

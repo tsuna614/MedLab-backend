@@ -62,6 +62,11 @@ const productSchema = mongoose.Schema(
       type: String,
       required: false,
     },
+    language: {
+      type: String,
+      enum: ["en", "fr", "es", "vi", "ja", "zh-Hans", "de", "ru"],
+      default: "en",
+    },
   },
   {
     timestamps: true,
