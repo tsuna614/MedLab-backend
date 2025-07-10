@@ -1,5 +1,12 @@
 const Product = require("../models/product.model");
 
+function normalizeText(text) {
+  return text
+    .replace(/[\u202F\u00A0\u2000-\u200B]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 const productController = {
   queryProduct: async (req, res) => {
     try {
@@ -65,10 +72,37 @@ const productController = {
       res.status(500).json({ message: error.message });
     }
   },
+  // getProductByName: async (req, res) => {
+  //   try {
+  //     const name = req.query.name;
+  //     const language = req.query.language || "en";
+
+  //     const product = await Product.findOne({
+  //       name: new RegExp(name, "i"),
+  //       language: language,
+  //     });
+
+  //     if (!product) {
+  //       return res.status(404).json({ message: "Product not found" });
+  //     }
+
+  //     res.status(200).json(product);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
   getProductByName: async (req, res) => {
     try {
-      const name = req.query.name;
+      let name = req.query.name;
       const language = req.query.language || "en";
+
+      if (!name) {
+        return res
+          .status(400)
+          .json({ message: "Name query parameter is required" });
+      }
+
+      name = normalizeText(name);
 
       const product = await Product.findOne({
         name: new RegExp(name, "i"),
